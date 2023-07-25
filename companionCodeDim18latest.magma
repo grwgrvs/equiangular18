@@ -283,9 +283,9 @@ getInterlacingCharacteristicPolynomialsOddnPreComp:=function(mp,qp,n,k,ssc)
 	return listPowerReduceOddPreComp(llred2,qp,k,ssc);
 end function;
 
-// ssc497:=SeidelCharPolysMod(49,7);
+// ssc597:=SeidelCharPolysMod(59,7);
 
-Lemma32Polys:=function()
+thm22Polys:=function()
 	P<x>:=PolynomialRing(Rationals());
 	ll2:=getCoeffsType2(12,[1,-156,11136]);
 	llshift2:=[Evaluate(P!Polynomial(Reverse(l)), x+1) : l in ll2];
@@ -427,7 +427,7 @@ all44polys:=[
     200310145815, -1047836371504, 3687440735550, -7835532814824, 7600163127557 ]
 ];
 
-checkLemma32:=procedure()
+checkLemma29:=procedure()
 	P<x>:=PolynomialRing(Rationals());
 	print "--- Candidates for char polys corresponding to 60 lines ---";
 	print "";
@@ -530,62 +530,6 @@ checkLemma32:=procedure()
 			print "";
 		end for;
 end procedure;
-
-checkLemma54MakeTable:=procedure()
-	P<x>:=PolynomialRing(Rationals());
-	cand49red:=all194polys;
-	inds:=[i : i in [2..3]] cat [i : i in [5..5]] cat [i : i in [7..8]] cat [i : i in [11..12]] cat [i : i in [14..14]] cat [i : i in [16..21]] cat [i : i in [23..23]] cat [i : i in [26..29]] cat [i : i in [31..34]] cat [i : i in [36..41]] cat [i : i in [43..51]] cat [i : i in [53..57]] cat [i : i in [59..60]] cat [i : i in [62..70]] cat [i : i in [72..72]] cat [i : i in [74..84]] cat [i : i in [87..88]] cat [i : i in [90..101]] cat [i : i in [103..121]] cat [i : i in [123..126]] cat [i : i in [128..129]] cat [i : i in [131..141]] cat [i : i in [143..156]] cat [i : i in [158..166]] cat [i : i in [168..185]] cat [i : i in [187..193]];
-	cand49:=[cand49red[inds[i]] : i in [1..164]];
-	bag:=[];
-	for i in [1..#cand49] do
-		ff:=P!Polynomial(Reverse(cand49[i]))*(x+5)^32*(x-9)^4;
-		gcd:=GCD(ff,Derivative(ff));
-		ms:=P!(ff/gcd);
-		g:=P!(Derivative(ff)/gcd);
-		deg:=Degree(ms);
-		f:=ms+48*x^(deg-2);
-		coeffs:=Reverse(Coefficients(f));
-		gf:=x^(deg-3)*P!(Polynomial([coeffs[3],coeffs[2],coeffs[1]]));
-		ggf:=Evaluate(gf,x-1);
-		clist:=Reverse(Coefficients(ggf));
-		tic := Cputime();
-		ll:=getCoeffsType2(deg-1,[clist[1],clist[2],clist[3]]);
-		llpol:=[Evaluate(P!Polynomial(Reverse(l)),x+1) : l in ll];
-		ll2:=[Reverse(Coefficients(l)) : l in llpol];
-		bag cat:= [listInterlaceReduce(ll2,ms)];
-		tt:=Cputime(tic);
-		print "(", i, ",", tt, ")";
-	end for;
-end procedure;
-
-
-getInterlacingCharacteristicPolynomialsEvenn:=function(mp,qp,n)
-	P<x>:=PolynomialRing(Rationals());
-	d:=Degree(mp)-1;
-	aa:=Reverse(Coefficients(mp));
-	q:=x^d+aa[2]*x^(d-1)+(aa[3]+n)*x^(d-2);
-	qq:=Evaluate(q,x-1);
-	bb:=Reverse(Coefficients(qq));
-	ll2:=getCoeffsType2(d,[1,bb[2],bb[3]]);
-	llshift2:=[P!(Evaluate(Polynomial(Reverse(l)),x+1)) : l in ll2];
-	lllist2:=[Reverse(Coefficients(l)) : l in llshift2];
-	llred2:=listInterlaceReduce(lllist2,mp);
-	return listPowerReduce(llred2,qp);
-end function;
-
-getInterlacingCharacteristicPolynomialsOddn:=function(mp,qp,n,k)
-	P<x>:=PolynomialRing(Rationals());
-	d:=Degree(mp)-1;
-	aa:=Reverse(Coefficients(mp));
-	q:=x^d+aa[2]*x^(d-1)+(aa[3]+n)*x^(d-2);
-	qq:=Evaluate(q,x-1);
-	bb:=Reverse(Coefficients(qq));
-	ll2:=getCoeffsWeaklyType2(d,[1,bb[2],bb[3]]);
-	llshift2:=[P!(Evaluate(Polynomial(Reverse(l)),x+1)) : l in ll2];
-	lllist2:=[Reverse(Coefficients(l)) : l in llshift2];
-	llred2:=listInterlaceReduce(lllist2,mp);
-	return listPowerReduceOdd(llred2,qp,n,k);
-end function;
 
 //checks compatibility by definition (checking all \pm 1 vectors)
 isCompatibleSlow:=function(simpInds,q,froots,sqrts,n)
@@ -1023,7 +967,7 @@ printInterlacingConfigs:=function(poly,warr,cert)
 	return qp, compatPolys, sls;
 end function;
 
-checkLemma41:=procedure()
+checkLemma211:=procedure()
 	P<x>:=PolynomialRing(Rationals());
 	fff:=(x+5)^42*(x-9)^3*(x-11)^6*(x-13)^9;
 	print Factorisation(fff);
@@ -1071,7 +1015,7 @@ checkLemma41:=procedure()
 	end if;
 end procedure;
 
-checkLemma42:=procedure()
+checkLemma212:=procedure()
 	P<x>:=PolynomialRing(Rationals());
 	fff:=(x+5)^42*(x-11)^14*(x-13)^3*(x-17);
 	print Factorisation(fff);
@@ -1157,7 +1101,7 @@ checkLemma42:=procedure()
 	print "";
 end procedure;
 
-checkLemma43:=procedure()
+checkLemma214:=procedure()
 	P<x>:=PolynomialRing(Rationals());
 	fff:=(x+5)^42*(x-9)^2*(x-11)^9*(x-13)^6*(x-15);
 	// print Factorisation(fff);
@@ -1202,55 +1146,36 @@ checkLemma43:=procedure()
 	print "";
 end procedure;
 
-// checkLemma43:=procedure()
-// 	P<x>:=PolynomialRing(Rationals());
-// 	fff:=(x+5)^42*(x-9)^2*(x-11)^9*(x-13)^6*(x-15);
-// 	print Factorisation(fff);
-// 	mp:=P!(fff/GCD(fff,Derivative(fff)));
-// 	qp:=P!(fff/mp);
-// 	print "Computing interlacing char polys...";
-// 	tic := Cputime();
-// 	llSeidelred:=getInterlacingCharacteristicPolynomialsOddn(mp,qp,59,7);
-// 	toc := Cputime(tic);
-// 	print "Time taken to compute interlacing char polys:", toc,  "seconds";
-// 	print "";
-// 	numrows:=#llSeidelred;
-//
-// 	print "Number of interlacing polynomials:", numrows;
-// 	AC:=AlgebraicClosure();
-// 	PK<z>:=PolynomialRing(AC);
-// 	ggroots:=Roots(fff,AC);
-// 	m:=Matrix(AC,numrows,Degree(mp),[llSeidelred[j] : j in [1..numrows]]);
-//
-// 	mults:=Vector(AC,[ggroots[i][2] : i in [1..#ggroots]]);
-// 	froots:=[ggroots[i][1] : i in [1..#ggroots]];
-//
-// 	// print froots;
-// 	fbas:=[PK!(PK!(mp)/(z-r)) : r in froots];
-// 	// print fbas;
-// 	fbaslist:=[Reverse(Coefficients(l)) : l in fbas];
-//
-// 	fbasm:=Matrix(AC,Degree(mp),Degree(mp),[fbaslist[j] : j in [1..Degree(mp)]]);
-//
-// 	bb:=mults*fbasm;
-// 	print "Matrix A corresponding to interlacing polynomials:";
-// 	print m;
-//
-// 	pr,sp:=Solution(m,bb);
-// 	// print pr;
-// 	// print sp;
-// 	print "--- list interlacing configurations ---";
-// 	if Dimension(sp) eq 0 then
-// 		print pr;
-// 		sls:=[];
-// 	else
-// 		sls:=findSols(pr,sp,Degree(mp));
-// 		print " there are", #sls, "interlacing configurations";
-// 		print sls;
-// 	end if;
-// end procedure;
-
-checkLemma44:=procedure()
+checkLemma216:=procedure()
 	P<x>:=PolynomialRing(Rationals());
 	qp1, compat1, sls:=printInterlacingConfigs((x+5)^42*(x-11)^10*(x-13)^6*(x^2-22*x+109),[1,-41,609,-3871,8886],[16485427, 0, 0, 0, -1859]);
 end procedure;
+
+ttm := Time();
+
+print " "; print " "; print " ";
+print "Theorem 2.2"; print " ";
+thm22Polys();
+
+print " "; print " "; print " ";
+print "Lemma 2.9"; print " ";
+checkLemma29();
+
+print " "; print " "; print " ";
+print "Lemma 2.11"; print " ";
+checkLemma211();
+
+print " "; print " "; print " ";
+print "Lemma 2.12"; print " ";
+checkLemma212();
+
+print " "; print " "; print " ";
+print "Lemma 2.14"; print " ";
+checkLemma214();
+
+print " "; print " "; print " ";
+print "Lemma 2.16"; print " ";
+checkLemma216();
+
+print " "; print " "; print " ";
+print "Total running time: ", Time(ttm), " seconds";
