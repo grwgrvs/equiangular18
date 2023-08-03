@@ -1,0 +1,225 @@
+ttm := Time();
+
+makeCycleGraph:=function(p)
+	G:=PolygonGraph(p[1]);
+	for i in [2..#p] do
+		G:=Union(G,PolygonGraph(p[i]));
+	end for;
+	return G;
+end function;
+
+parts:=Partitions(20);
+cyclePartitions:=[];
+for part in parts do
+	if {e : e in part} meet {1,2} eq {} then
+		Append(~cyclePartitions,part);
+	end if;
+end for;
+
+reduceCyclePartitions:=function(parts)
+	survivors:=[];
+	Q<x>:=RationalFunctionField(RationalField());
+	I20:=IdentityMatrix(RationalField(),20);
+	J20:=Matrix(RationalField(),20,[1 : i in [1..20^2]]);
+	for p in parts do
+		g:=makeCycleGraph(p);
+		a:=AdjacencyMatrix(g);
+		// m:=(x+4)/((x-2)*(x+6))*I+1/((x-2)*(x+6))*a+9/((x-22)*(x-4)*(x+8))*J+(x+4)/((x-4)*(x-2)*(x+6)*(x+8))*tp1+2/((x-4)*(x-2)*(x+6)*(x+8))*tp5;
+		m:=(x+4)/((x-2)*(x+6))*I20+1/((x-2)*(x+6))*a+9/((x-22)*(x-2)*(x+6))*J20+(x-14)/((x-22)*(x-2)*(x+6)*(x+8))*J20+2/((x-22)*(x-2)*(x+6)*(x+8))*J20;
+		f:=Determinant(m);
+		ff:=f*(x-22)*(x-2)^42*(x+6)^15*(x+8)^2;
+		if Denominator(ff) eq 1 then
+			Append(~survivors,p);
+		end if;
+	end for;
+	return survivors;
+end function;
+
+
+I20:=IdentityMatrix(RationalField(),20);
+I5:=IdentityMatrix(RationalField(),5);
+J20:=Matrix(RationalField(),20,[1 : i in [1..(20)^2]]);
+J4:=Matrix(RationalField(),4,[1 : i in [1..(4)^2]]);
+KPJ45:=KroneckerProduct(I5,J4);
+gc45:=makeCycleGraph([4,4,4,4,4]);
+AG:=AutomorphismGroup(gc45);
+c45:=AdjacencyMatrix(gc45);
+
+//for a fast check to prune out unwanted possibilities, we set x to an arbitrary value : k= 11
+k:=11;
+A:=(k+4)*I20+c45+10*(k+6)*J20/(k+8)/(k-22);
+detA:=Determinant(A);
+Ainv:=A^-1;
+
+makeB:=function(list)
+	a:=#list;
+	B:=Matrix(RationalField(),20,a,[(9*k+82)/(k+8)/(k-22) : i in [1..20*a]]);
+	olist:=[e : e in list];
+	for i in [1..a] do
+		for j in olist[i] do
+			B[j,i]+:=1;
+		end for;	
+	end for;
+	return B;
+end function;
+
+//performs a fast check of the subgraph condition, instead of using an indeterminate x, it uses an arbitrary scalar k, defined above
+checkDeterminant:=function(list)
+	a:=#list;
+	D:=Matrix(RationalField(),a,[10*(k+6)/(k+8)/(k-22) : i in [1..a^2]])+(k+4);
+	B:=makeB(list);
+	d:=Determinant(D-Transpose(B)*Ainv*B);
+	cp:=(k-22)*(k-2)^42*(k+6)^15*(k+8)^2;
+	return Denominator(detA*cp*d/(k+6)^(20+a)/(k-2)^(20+a)) eq 1;
+end function;
+
+//the following matrices are used for the proper determinant check
+Q<x>:=RationalFunctionField(RationalField());
+Ax:=(x+4)*I20+c45+10*(x+6)*J20/(x+8)/(x-22);
+detAx:=Determinant(Ax);
+Ainvx:=Ax^-1;
+
+makeBx:=function(list)
+	a:=#list;
+	Bx:=Matrix(Q,20,a,[(9*x+82)/(x+8)/(x-22) : i in [1..20*a]]);
+	olist:=[e : e in list];
+	for i in [1..a] do
+		for j in olist[i] do
+			Bx[j,i]+:=1;
+		end for;	
+	end for;
+	return Bx;
+end function;
+
+//checks subgraph condition
+checkDeterminantFull:=function(list)
+	a:=#list;
+	Dx:=Matrix(Q,a,[10*(x+6)/(x+8)/(x-22) : i in [1..a^2]])+(x+4);
+	Bx:=makeBx(list);
+	d:=Determinant(Dx-Transpose(Bx)*Ainvx*Bx);
+	// print Factorisation(Numerator(d));
+	// print Factorisation(Denominator(d));
+	cp:=(x-22)*(x-2)^42*(x+6)^15*(x+8)^2;
+	// print Denominator(detAx*cp*d/(x+6)^(20+a)/(x-2)^(20+a));
+	return Denominator(detAx*cp*d/(x+6)^(20+a)/(x-2)^(20+a)) eq 1;
+end function;
+
+makeGraph:=function(list)
+	G:=gc45;
+	count:=20;
+	for sb in list do
+		count+:=1;
+		AddVertex(~G);
+		G+:={{count,i} : i in sb};
+	end for;
+	return G;
+end function;
+
+isStrongIsomorphicGraph2:=function(g1,g2)
+	G1:=makeGraph(g1);
+	G2:=makeGraph(g2);
+	b, m:=IsIsomorphic(G1,G2);
+	if b then
+		V1:=Vertices(G1);
+		V2:=Vertices(G2);
+		p1:={V1[i] : i in [1..20]};
+		p2:={V1[i] : i in [21..#V1]};
+		mp1:={V2[i] : i in [1..20]};
+		mp2:={V2[i] : i in [21..#V2]};
+		if m(p1) eq mp1 and m(p2) eq mp2 then
+			return true;
+		end if;
+	end if;
+	return false;
+end function;
+
+uptoStrongIsomorphism:=function(Cs,adja)
+     rem:=Cs;
+     Css:={};
+     while not IsEmpty(rem) do
+          x:=Random(rem);
+          Include(~Css,x);
+          xlist:={adja[j] : j in x};
+          rem diff:={ y : y in rem | isStrongIsomorphicGraph2(xlist,{adja[j] : j in y}) };
+     end while;
+     return Css;
+end function;
+
+//prunes out graphs from Cs until only one representative from each orbit of gp remains
+reduceGraphs:=function(gp,Cs)
+     rem:=Cs;
+     Css:={};
+     while not IsEmpty(rem) do
+          x:=Random(rem);
+          Include(~Css,x);
+          orb:=Orbit(gp,x);
+          rem diff:={ y : y in rem | y in orb };
+     end while;
+     return {{*s*} : s in Css};
+end function;
+
+//adds a vertex to 5C4 and checks the subgraph condition
+addVertex:=function(ag,adjacencies)
+	survivingGraphs:={};
+	survivingAdjacencies:={};
+	gp:=AG;
+	for s in adjacencies do
+		newGraph:={*s*};
+		if checkDeterminant(newGraph) then
+			Include(~survivingGraphs,s);
+			Include(~survivingAdjacencies,s);
+		end if;
+	end for;
+	printf "Found %o survivors", #survivingGraphs;
+	print " on 21 vertices";
+	print "Reducing graphs up to isomorphism...";
+	return {<g,survivingAdjacencies> : g in reduceGraphs(gp,survivingGraphs)};
+end function;
+
+
+run:=procedure()
+	n:=20;
+	print "Start with 5C4";
+	print "Generating all 10-sets of {1..20}...";
+	adjacencies1:=[s : s in Subsets({1..20},10)];
+	print "Checking super graphs on 21 vertices...";
+	survivingGraphs:= addVertex(AG, adjacencies1);
+	printf "Found %o graph(s)", #survivingGraphs;
+	printf " on %o vertices\n", n+1;
+	print "Determining the vertices of G_u...";
+	ga:=Random(survivingGraphs);
+	adja:=[a : a in ga[2]];
+	Sn:=Sym(#adja);
+	G:=sub<Sn|[Sn|[Position(adja,x^g) : x in adja] : g in Generators(AG)]>;
+	r1:={{1}};
+	garray:=[r1];
+	rr:=Random(r1);
+	G1:=Stabilizer(G,rr);
+	rep:={o:o in Orbits(G1) | checkDeterminant({adja[j] : j in (rr join {Random(o)})})};
+	rep:={o:o in rep| #(rr join {Random(o)}) eq 2 and checkDeterminantFull({adja[j] : j in (rr join {Random(o)})})};
+	compat:=[];
+	for o in rep do
+		for x in o do
+			Append(~compat,x);
+		end for;
+	end for;
+	printf "G_u has %o vertices\n", #compat;
+	print "Checking compatibility of vertices...";
+	CG:=EmptyGraph(#compat);
+	for i in [1..#compat] do
+		for j in [i+1..#compat] do
+			if checkDeterminant({adja[k] : k in {compat[i],compat[j]}}) then
+				if checkDeterminantFull({adja[k] : k in {compat[i],compat[j]}}) then
+					CG+:={i,j};
+				end if;
+			end if;
+		end for;
+	end for;
+	print "computing clique number of Gu...";
+	cn:=CliqueNumber(CG);
+	printf "Clique number is %o\n", cn;
+end procedure;
+
+
+run();
+print "Total running time: ", Time(ttm), " seconds";
