@@ -215,7 +215,7 @@ run:=procedure()
 			end if;
 		end for;
 	end for;
-	print "computing clique number of Gu...";
+	print "Computing clique number of G_u...";
 	cn:=CliqueNumber(CG);
 	printf "Clique number is %o\n", cn;
 end procedure;
